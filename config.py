@@ -6,17 +6,13 @@ Put your .pt files in the models/ folder: every file there is used automatically
 # Folder with your models (.pt / .pth)
 MODELS_FOLDER = "models"
 
-# Class names, SAME ORDER as in training (ImageFolder sorts the folder names A→Z).
-# Your models have 5 classes — write their names here, e.g. ["Forest", "River", ...].
-# Empty = show "Class 0", "Class 1", ...
-CLASS_NAMES = [
-]
+# Class names, SAME ORDER as in training
+CLASS_NAMES = ['Agriculture', 'Nature_Forest', 'Water', 'Residential', 'Industrial_Infrastructure']
 
-# Optional emoji for each class name
+# Emoji shown next to each class name
 CLASS_ICONS = {
-    "AnnualCrop": "🌾", "Forest": "🌲", "HerbaceousVegetation": "🌿", "Highway": "🛣️",
-    "Industrial": "🏭", "Pasture": "🐄", "PermanentCrop": "🍇", "Residential": "🏘️",
-    "River": "🏞️", "SeaLake": "🌊",
+    "Agriculture": "🌾", "Nature_Forest": "🌲", "Water": "🌊",
+    "Residential": "🏘️", "Industrial_Infrastructure": "🏭",
 }
 
 # Image pre-processing — same as the torchvision transforms used in training:
