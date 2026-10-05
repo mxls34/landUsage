@@ -5,7 +5,7 @@ A Streamlit website with 3 pages (nav bar on the left):
 | Page | What it does |
 |---|---|
 | 🔍 Predict | Press the upload button, choose **one picture** from your device, press **Predict** — every model classifies it: final answer (majority vote), each model's top-3 classes, probability of every class |
-| 📊 Dashboard | Tests every model on labelled images in `test_data/<class name>/` (or an uploaded .zip): leaderboard, accuracy / speed charts, F1 per class, confusion matrix |
+| 📊 Dashboard | After you press Predict: compares the answer of every model — ranked with the **Rank by** list (confidence, agreement, speed, name), confidence and speed charts, probability of every class, and a summary of every picture you predicted |
 | 🤖 Models | The models in `models/`: architecture, classes, size |
 
 ## Run

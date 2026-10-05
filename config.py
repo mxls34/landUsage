@@ -28,9 +28,3 @@ STD = [0.229, 0.224, 0.225]
 #                mobilenet_v2, efficientnet_b0, vit_b_16, vit_b_32, convnext_tiny, densenet121
 MODEL_SETTINGS = {
 }
-
-# Dashboard: labelled test images, one sub-folder per class (folder name = class name):
-#   test_data/Forest/img1.jpg, test_data/River/img2.jpg, ...   (or upload a .zip on the page)
-TEST_FOLDER = "test_data"
-MAX_IMAGES_PER_CLASS = None      # e.g. 100 for a faster test, None = every image
-BATCH_SIZE = 16
