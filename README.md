@@ -1,8 +1,12 @@
 # 🛰️ Land Usage Classifier
 
-A Streamlit website: upload **one satellite image**, press **Predict**, and every model in
-`models/` classifies the land usage. You see the final answer (majority vote), each model's
-answer with its top-3 classes, and the probability of every class.
+A Streamlit website with 3 pages (nav bar on the left):
+
+| Page | What it does |
+|---|---|
+| 🔍 Predict | Press the upload button, choose **one picture** from your device, press **Predict** — every model classifies it: final answer (majority vote), each model's top-3 classes, probability of every class |
+| 📊 Dashboard | Tests every model on labelled images in `test_data/<class name>/` (or an uploaded .zip): leaderboard, accuracy / speed charts, F1 per class, confusion matrix |
+| 🤖 Models | The models in `models/`: architecture, classes, size |
 
 ## Run
 
@@ -33,6 +37,12 @@ Every file there is loaded automatically. It works with any of these ways of sav
 For "only the weights" the architecture is found from the weights: ResNet18/34/50,
 MobileNetV3 (large/small), MobileNetV2, EfficientNet, ConvNeXt, DenseNet, ViT-B/16 …
 including your own classifier head (e.g. `nn.Sequential(nn.Linear(...), nn.ReLU(), nn.Dropout(), nn.Linear(...))`).
+
+## Your own model class
+
+If a model is not a plain torchvision model (like `best(nuum).pt`: MobileNetV3 features +
+a projection layer), it is built from the classes in `custom_models.py`. If its predictions
+look wrong, paste the real class from your training notebook there.
 
 ## Settings (`config.py`)
 

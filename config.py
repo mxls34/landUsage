@@ -7,12 +7,12 @@ Put your .pt files in the models/ folder: every file there is used automatically
 MODELS_FOLDER = "models"
 
 # Class names, SAME ORDER as in training (ImageFolder sorts the folder names A→Z).
-# Not needed if your checkpoint saved them as "class_names" / "classes" / "class_to_idx".
+# Your models have 5 classes — write their names here, e.g. ["Forest", "River", ...].
+# Empty = show "Class 0", "Class 1", ...
 CLASS_NAMES = [
-    "AnnualCrop", "Forest", "HerbaceousVegetation", "Highway", "Industrial",
-    "Pasture", "PermanentCrop", "Residential", "River", "SeaLake",
 ]
 
+# Optional emoji for each class name
 CLASS_ICONS = {
     "AnnualCrop": "🌾", "Forest": "🌲", "HerbaceousVegetation": "🌿", "Highway": "🛣️",
     "Industrial": "🏭", "Pasture": "🐄", "PermanentCrop": "🍇", "Residential": "🏘️",
@@ -32,3 +32,9 @@ STD = [0.229, 0.224, 0.225]
 #                mobilenet_v2, efficientnet_b0, vit_b_16, vit_b_32, convnext_tiny, densenet121
 MODEL_SETTINGS = {
 }
+
+# Dashboard: labelled test images, one sub-folder per class (folder name = class name):
+#   test_data/Forest/img1.jpg, test_data/River/img2.jpg, ...   (or upload a .zip on the page)
+TEST_FOLDER = "test_data"
+MAX_IMAGES_PER_CLASS = None      # e.g. 100 for a faster test, None = every image
+BATCH_SIZE = 16

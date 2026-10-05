@@ -19,11 +19,16 @@ html, body, .stApp, [class*="css"] { font-family: "Poppins", system-ui, -apple-s
     background-attachment: fixed;
 }
 [data-testid="stHeader"] { background: transparent; }
-[data-testid="stSidebar"], [data-testid="stSidebarCollapsedControl"] { display: none; }
+[data-testid="stSidebar"] {
+    background: rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(255, 255, 255, 0.6);
+}
 
 /* Main glass panel */
 .block-container {
-    max-width: 980px;
+    max-width: 1180px;
     background: rgba(255, 255, 255, 0.28);
     backdrop-filter: blur(22px) saturate(160%);
     -webkit-backdrop-filter: blur(22px) saturate(160%);
@@ -81,7 +86,7 @@ h1, h2, h3, h4, p, label { color: #1f1d2b; }
 }
 
 /* Buttons: purple pill */
-.stButton > button {
+.stButton > button, [data-testid="stDownloadButton"] > button {
     background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
     color: #ffffff !important;
     border: 1px solid rgba(255, 255, 255, 0.6);
@@ -91,8 +96,8 @@ h1, h2, h3, h4, p, label { color: #1f1d2b; }
     box-shadow: 0 10px 22px rgba(124, 58, 237, 0.30), inset 0 2px 0 rgba(255, 255, 255, 0.45);
     transition: all 0.2s ease;
 }
-.stButton > button p { color: #ffffff !important; font-size: 1.05rem; }
-.stButton > button:hover {
+.stButton > button p, [data-testid="stDownloadButton"] > button p { color: #ffffff !important; font-size: 1.05rem; }
+.stButton > button:hover, [data-testid="stDownloadButton"] > button:hover {
     transform: translateY(-2px);
     box-shadow: 0 14px 28px rgba(124, 58, 237, 0.42), inset 0 2px 0 rgba(255, 255, 255, 0.5);
     border-color: rgba(255, 255, 255, 0.9);
