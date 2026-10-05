@@ -80,9 +80,13 @@ def load(path: Path) -> LoadedModel:
         obj = _read(path)
         model, state, info = _unwrap(obj)
         if model is None:
-            arch = settings.get("arch") or info.get("arch") or _guess_architecture(state)
-            model = _build(arch, state)
-            lm.arch = _pretty(arch)
+            arch = settings.get("arch") or info.get("arch") or _try_guess_state(state)
+            if arch:
+                model = _build(arch, state)
+                lm.arch = _pretty(arch)
+            else:
+                model = _build_custom(state)
+                lm.arch = getattr(model, "arch_name", type(model).__name__)
         else:
             lm.arch = _pretty(_try_guess(model) or type(model).__name__)
         model.eval()
@@ -166,6 +170,28 @@ def _guess_architecture(state) -> str:
     raise ValueError("Could not recognise the architecture from the weights")
 
 
+def _try_guess_state(state) -> str | None:
+    try:
+        return _guess_architecture(state)
+    except ValueError:
+        return None
+
+
+def _build_custom(state) -> nn.Module:
+    """Try the classes in custom_models.py (your own architectures)."""
+    import custom_models
+    matrices = [v for v in state.values() if v.dim() == 2]
+    num_classes = matrices[-1].shape[0] if matrices else 1
+    for cls in custom_models.CUSTOM_MODELS:
+        try:
+            model = cls(num_classes=num_classes)
+            model.load_state_dict(state, strict=True)
+            return model
+        except Exception:
+            continue
+    raise ValueError("Could not recognise the architecture from the weights")
+
+
 def _try_guess(model: nn.Module) -> str | None:
     try:
         return _guess_architecture(model.state_dict())
@@ -243,8 +269,9 @@ def _class_names(names, n: int, lm: LoadedModel) -> list:
     for candidate in (names, config.CLASS_NAMES):
         if candidate and len(candidate) == n:
             return list(candidate)
-    lm.notes.append(f"This model has {n} classes but CLASS_NAMES in config.py has "
-                    f"{len(config.CLASS_NAMES)} — showing class numbers instead.")
+    if config.CLASS_NAMES:
+        lm.notes.append(f"This model has {n} classes but CLASS_NAMES in config.py has "
+                        f"{len(config.CLASS_NAMES)} — showing class numbers instead.")
     return [f"Class {i}" for i in range(n)]
 
 
@@ -262,7 +289,8 @@ def _pretty(arch: str) -> str:
 HINTS = {
     "Can't get attribute": "The model class was defined in your notebook. Save the weights instead: "
                            "torch.save(model.state_dict(), 'best.pt')",
-    "Could not recognise": "Add the architecture in config.py → MODEL_SETTINGS, e.g. {\"arch\": \"resnet18\"}",
+    "Could not recognise": "This is your own model class: paste it into custom_models.py "
+                           "and add it to CUSTOM_MODELS",
     "size mismatch": "Add the architecture in config.py → MODEL_SETTINGS, e.g. {\"arch\": \"resnet18\"}",
     "Missing key": "Add the architecture in config.py → MODEL_SETTINGS, e.g. {\"arch\": \"resnet18\"}",
 }
@@ -285,16 +313,26 @@ def _logits(out) -> torch.Tensor:
     return out.reshape(out.shape[0], -1)
 
 
-def predict(lm: LoadedModel, image: Image.Image) -> tuple[np.ndarray, float]:
-    """-> (probability of every class, milliseconds)."""
-    img = image.convert("RGB").resize((lm.img_size, lm.img_size), Image.BILINEAR)
+def _to_tensor(image: Image.Image, size: int) -> torch.Tensor:
+    """Same as Resize((size, size)) + ToTensor() + Normalize(MEAN, STD)."""
+    img = image.convert("RGB").resize((size, size), Image.BILINEAR)
     x = torch.from_numpy(np.asarray(img, dtype=np.float32) / 255.0).permute(2, 0, 1)
-    x = (x - torch.tensor(config.MEAN)[:, None, None]) / torch.tensor(config.STD)[:, None, None]
+    return (x - torch.tensor(config.MEAN)[:, None, None]) / torch.tensor(config.STD)[:, None, None]
+
+
+def predict_batch(lm: LoadedModel, images: list) -> tuple[np.ndarray, float]:
+    """-> (probabilities, shape (n images, n classes), milliseconds spent in the model)."""
+    x = torch.stack([_to_tensor(img, lm.img_size) for img in images])
     start = time.perf_counter()
     with torch.no_grad():
-        logits = _logits(lm.model(x.unsqueeze(0)))
+        logits = _logits(lm.model(x)).float()
     ms = (time.perf_counter() - start) * 1000
-    probs = logits[0].float()
-    if probs.min() < 0 or abs(float(probs.sum()) - 1) > 1e-3:   # logits -> probabilities
-        probs = torch.softmax(probs, dim=0)
-    return probs.numpy(), ms
+    if logits.min() < 0 or not torch.allclose(logits.sum(1), torch.ones(len(logits)), atol=1e-3):
+        logits = torch.softmax(logits, dim=1)   # logits -> probabilities
+    return logits.numpy(), ms
+
+
+def predict(lm: LoadedModel, image: Image.Image) -> tuple[np.ndarray, float]:
+    """One image -> (probability of every class, milliseconds)."""
+    probs, ms = predict_batch(lm, [image])
+    return probs[0], ms
