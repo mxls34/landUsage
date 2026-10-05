@@ -12,6 +12,7 @@ and the classifier head are worked out from the weights themselves.
 """
 from __future__ import annotations
 
+import importlib
 import time
 import warnings
 from collections import OrderedDict
@@ -180,6 +181,7 @@ def _try_guess_state(state) -> str | None:
 def _build_custom(state) -> nn.Module:
     """Try the classes in custom_models.py (your own architectures)."""
     import custom_models
+    custom_models = importlib.reload(custom_models)   # always use the newest version of the file
     # the number of classes is the output size of one of the Linear layers
     sizes = list(dict.fromkeys(v.shape[0] for v in reversed(state.values()) if v.dim() == 2))
     for cls in custom_models.CUSTOM_MODELS:
