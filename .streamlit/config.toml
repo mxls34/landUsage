@@ -1,0 +1,14 @@
+[theme]
+base = "light"
+primaryColor = "#7c3aed"
+textColor = "#1f1d2b"
+
+[client]
+showSidebarNavigation = false
+toolbarMode = "minimal"
+
+[server]
+runOnSave = true
+
+[browser]
+gatherUsageStats = false
