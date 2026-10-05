@@ -180,15 +180,16 @@ def _try_guess_state(state) -> str | None:
 def _build_custom(state) -> nn.Module:
     """Try the classes in custom_models.py (your own architectures)."""
     import custom_models
-    matrices = [v for v in state.values() if v.dim() == 2]
-    num_classes = matrices[-1].shape[0] if matrices else 1
+    # the number of classes is the output size of one of the Linear layers
+    sizes = list(dict.fromkeys(v.shape[0] for v in reversed(state.values()) if v.dim() == 2))
     for cls in custom_models.CUSTOM_MODELS:
-        try:
-            model = cls(num_classes=num_classes)
-            model.load_state_dict(state, strict=True)
-            return model
-        except Exception:
-            continue
+        for num_classes in sizes:
+            try:
+                model = cls(num_classes=num_classes)
+                model.load_state_dict(state, strict=True)
+                return model
+            except Exception:
+                continue
     raise ValueError("Could not recognise the architecture from the weights")
 
 

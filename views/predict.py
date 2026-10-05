@@ -55,6 +55,7 @@ top_votes = max(votes.values())
 final = max((a for a in votes if votes[a] == top_votes),
             key=lambda a: sum(p.max() for (m, p, _), b in zip(results, answers) if b == a))
 agreeing = [float(p.max()) * 100 for (m, p, _), a in zip(results, answers) if a == final]
+shared.save_prediction(upload_id, uploaded.name, image, results, final)   # for the Dashboard page
 
 if len(results) == 1:
     style.answer_card(shared.label(final), ["Prediction", results[0][0].arch], [f"Confidence: {agreeing[0]:.1f}%"])
@@ -69,6 +70,7 @@ for (m, p, ms), answer in zip(results, answers):
     cards.append({"name": m.name, "arch": m.arch, "label": shared.label(answer), "ms": ms, "agrees": answer == final,
                   "top": [(m.classes[i], float(p[i]) * 100) for i in order]})
 style.model_cards(cards)
+st.page_link("views/dashboard.py", label="Compare the models on the Dashboard", icon="📊")
 
 # ----------------------------------------------------------------- compare (when the models share their classes)
 classes = results[0][0].classes
