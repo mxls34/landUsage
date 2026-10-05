@@ -1,4 +1,5 @@
 """Things every page uses: the loaded models and the saved predictions."""
+import hashlib
 import io
 
 import streamlit as st
@@ -16,8 +17,10 @@ def _load(file_name: str, modified: float, settings: str) -> loader.LoadedModel:
 
 
 def _settings() -> str:
-    """Part of the cache key: editing config.py reloads the models."""
-    return repr((config.CLASS_NAMES, config.IMG_SIZE, config.MEAN, config.STD, config.MODEL_SETTINGS))
+    """Part of the cache key: editing config.py, loader.py or custom_models.py reloads the models."""
+    code = "".join((loader.BASE_DIR / f).read_text(encoding="utf-8") for f in ("loader.py", "custom_models.py"))
+    return repr((config.CLASS_NAMES, config.IMG_SIZE, config.MEAN, config.STD, config.MODEL_SETTINGS,
+                 hashlib.sha1(code.encode()).hexdigest()))
 
 
 def get_models() -> list:
